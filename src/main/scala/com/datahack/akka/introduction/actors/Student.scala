@@ -1,32 +1,28 @@
-package com.datahack.akka.introduction.actors
+package scala.com.datahack.akka.introduction.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
-import com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
-import com.datahack.akka.introduction.actors.Teacher.{Advice, AskAdvice, IDoNotUnderstand}
 import org.scalacheck.Gen
 
-object Student {
+import scala.com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
+import scala.com.datahack.akka.introduction.actors.Teacher.{Advice, AskAdvice, IDoNotUnderstand}
+
+object Student{
 
   case object PerformAnAdviceRequest
 }
 
-class Student(teacher: ActorRef) extends Actor with ActorLogging {
+class Student(teacher:ActorRef) extends Actor with ActorLogging{
 
-  log.debug(s"${self.path} actor created")
+  log.debug(s"Creating student: ${self.path}")
 
-  def getTopic: Gen[String] = Gen.oneOf("History", "Maths", "Geography", "Physics", "Literature")
+  val genTopics:Gen[String] =
+    Gen.oneOf("History","Maths","Geography","Physics","Literature","Biology")
 
   override def receive: Receive = {
-
     case PerformAnAdviceRequest =>
-      val topic = getTopic.sample.get
+      val topic = genTopics.sample.get
       teacher ! AskAdvice(topic)
-
-    case Advice(text) =>
-      log.info(s"The requested advice: $text.")
-
-    case IDoNotUnderstand =>
-      log.warning("Ups I do not know what happens.")
-
+    case Advice(texto) => log.info(s"The requested advice: $texto")
+    case IDoNotUnderstand => log.error("NPI!")
   }
 }

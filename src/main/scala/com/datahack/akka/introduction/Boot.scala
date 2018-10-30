@@ -1,29 +1,39 @@
 package com.datahack.akka.introduction
 
-import akka.actor.{ActorSystem, Props}
-import com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
-import com.datahack.akka.introduction.actors.{Student, Teacher}
+import akka.actor.{ActorRef, ActorSystem, Props}
 
+import scala.com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
+import scala.com.datahack.akka.introduction.actors.{Student, Teacher}
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 
 object Boot extends App {
 
-  // Initialize the ActorSystem
-  val actorSystem = ActorSystem("UniversityMessageSystem")
+  val actorSystem = ActorSystem("UniversityMessagesSystem")
 
-  // Whe need an execution context to perform the concurrent code
-  implicit val executionContext: ExecutionContextExecutor = actorSystem.dispatcher
+  implicit val executionContext:ExecutionContextExecutor = actorSystem.dispatcher
 
-  // Construct the Teacher Actor Ref
-  val teacherActorRef = actorSystem.actorOf(Props[Teacher], "teacher")
+  val teacherActorRef:ActorRef = actorSystem.actorOf(Props[Teacher],"teacher1")
+  //el path de este teacher sería /user/teacher1 (porque le hemos puesto nombre)
 
-  // Construct the Student Actor Ref
-  val studentActorRef = actorSystem.actorOf(Props(classOf[Student], teacherActorRef), "student")
+  val studentActorRef:ActorRef = actorSystem.actorOf(Props(classOf[Student],teacherActorRef),"student1")
+  //path sería /user/student1
 
-  // Start asking advices
-  actorSystem.scheduler.schedule(5 seconds, 15 seconds, studentActorRef, PerformAnAdviceRequest)
 
-  // Ensure that the constructed ActorSystem is shut down when the JVM shuts down
+  actorSystem.scheduler
+    .schedule(5.seconds      //a 5 segundos de esta llamada
+      , 3 seconds   //y cada 5 segundos
+      , studentActorRef       //manda al studentActorRef
+      , PerformAnAdviceRequest)  //el mensaje este.
+
+  //Por defecto Akka busca un application.conf en cualquier sitio.SI hay varios los va apilando cogiendo el ultimo valor.
+
+
+  //Intercepta la señal de terminar apliación y salir de forma ordenada.
   sys.addShutdownHook(actorSystem.terminate())
+
+
+
+
+
 }
