@@ -29,11 +29,10 @@ class Inventory(productService: ProductService) extends Actor with ActorLogging 
   implicit val executionContext: ExecutionContext = context.dispatcher
 
   // Vamos a mantener un mapa mutable para gesionar el invenario
-  // TODO: iniciamos el mapa a un mapa vacío
   var inventory: mutable.Map[Long, (Product, Float)] = mutable.Map.empty[Long, (Product, Float)]
 
   // TODO: El comportamiento inicial será el que nos permita iniciar el inventario
-  override def receive: Receive = bootstrapBehaviour
+  override def receive: Receive = ???
 
   // Vamos a tener dos comportamientos:
   // Un comportamiento de inicio mientras obtenemos los datos de los productos de la base de datos
@@ -42,19 +41,16 @@ class Inventory(productService: ProductService) extends Actor with ActorLogging 
       // TODO: cuando nos llege el mensaje de iniciar el inventario, rellenaremos el mapa de inventario con
       // los datos de los productos almacenados en la base de datos.
       log.debug("Getting product list form database")
-      productService.products() pipeTo self
+
     case AllProducts(products) =>
       // Una vez que hemos procesado todos los productos y hemos generado el inventario cambiamos el comportamiento
       // del actor para procesar ordenes de compra
       log.info(s"Constructing inventory with ${products.length} products")
-      products.foreach(product => inventory.put(product.id.get, (product, product.units)))
-      context.become(manageOrdersBehaviour)
 
     case OrderItem(itemRequestId, _, _) =>
       // TODO: Si recivimos una petición para procesar una orden de compra, la ignoramos y contestamos
       // que no podemos processar la orden
       log.debug("Cannot process order, inventory under construction")
-      sender ! CannotProcessOder(itemRequestId)
   }
 
   // Un segundo comportamiento para procesar las peticiones de las sesiones
@@ -67,33 +63,16 @@ class Inventory(productService: ProductService) extends Actor with ActorLogging 
       // si existe, miramos a ver si hay suficiente cantidad para atender la orden de compra.
       // Si hay suficiente cantidad de producto contenstamos que se ha reservado el producto y cuanto asciende
       // el precio del pedido. Si no hay producto suficiente contestamos que no queda suficiente producto.
-      val response = inventory.get(productId).map { product =>
-        if (quantity <= product._2) {
-          val amount = quantity * product._1.price
-          inventory.put(productId, (product._1, product._2 - quantity))
-          ReservedProduct(itemRequestId, amount)
-        } else {
-          NotEnoughProductLeft(itemRequestId)
-        }
-      }.getOrElse(ProductNotFound(itemRequestId))
-      sender ! response
 
     case PersistSession(items) =>
       // TODO: Si recivimos la orden de persistir las sessión, iteramos sobre los items de compra y descontamos su
       // cantidad de la cantidad almacenada en la base de datos. Una vez terminado el proceso contestaremos indicacndo
       // que se ha terminado el proceso de checkout.
-      productService.persistSession(items.map(item => (item.productId, item.quantity)))
-      sender ! SessionCheckedOut
 
     case ClearSession(items) =>
       // TODO: si recivimos la orden de limpiar una sesión, recorreremos los items y reestableceremos la cantidad
       // disponible en el inventario. Una vez terminado el proceso respondemos indicando que se han reestablecido
       // los valores al estado anterior de la sesión cancelada.
-      items.foreach { item =>
-        inventory.get(item.productId).map { product =>
-          inventory.put(item.productId, (product._1, product._2 + item.quantity))
-        }
-      }
-      sender ! SessionRestored
+
   }
 }

@@ -17,40 +17,41 @@ import scala.concurrent.ExecutionContextExecutor
 object Boot extends App with Directives {
 
   // This configs are in the application.conf file
-  val config = ConfigFactory.load()
-  val host = config.getString("http.host") // Gets the host and a port from the configuration
-  val port = config.getInt("http.port")
+  val config = ???
+  val host = ???
+  val port = ???
 
-  implicit lazy val system: ActorSystem = ActorSystem("AkkaHttpExample")  // ActorMaterializer requires an implicit ActorSystem
-  implicit lazy val ec: ExecutionContextExecutor = system.dispatcher  // bindingFuture.map requires an implicit ExecutionContext
+  implicit lazy val system: ActorSystem = ???  // ActorMaterializer requires an implicit ActorSystem
+  implicit lazy val ec: ExecutionContextExecutor = ??? // bindingFuture.map requires an implicit ExecutionContext
 
-  implicit lazy val materializer: ActorMaterializer = ActorMaterializer()  // bindAndHandle requires an implicit materializer
+  implicit lazy val materializer: ActorMaterializer = ???  // bindAndHandle requires an implicit materializer
 
   // User controller
   lazy val userDao = new UserDao
   lazy val userService = new UserService(userDao)
-  lazy val userActor = system.actorOf(Props(classOf[UserControllerActor], userService), "UserController")
-  lazy val userController = new UserController(userActor)
+  lazy val userActor = ???
+  lazy val userController = ???
 
   // Product controller
   lazy val productDao = new ProductDao
   lazy val productService = new ProductService(productDao)
-  lazy val productActor = system.actorOf(Props(classOf[ProductControllerActor], productService), "ProductController")
-  lazy val productController = new ProductController(productActor)
+  lazy val productActor = ???
+  lazy val productController = ???
 
   // Session controller
-  lazy val inventoryActor = system.actorOf(Props(classOf[Inventory], productService), "Inventory")
-  lazy val sessionControllerActor = system.actorOf(Props(classOf[SessionControllerActor], inventoryActor), "SessionController")
-  lazy val sessionController = new SessionController(sessionControllerActor)
+  lazy val inventoryActor = ???
+  lazy val sessionControllerActor = ???
+  lazy val sessionController = ???
 
-  inventoryActor ! InitInventory
+  // TODO: Initialize inventory
+  //inventoryActor ! InitInventory
 
   // Start HTTP server
   // TODO: Add users controller routes
   // TODO: Add products controller routes
   // TODO: Add session controller routes
-  val routes = userController.routes ~ productController.routes ~ sessionController.routes
-  Http().bindAndHandle(routes, host, port)
+  val routes = ???
+  // TODO: bind Http actor to host an port with controller routes
 
   // Ensure that the constructed ActorSystem is shut down when the JVM shuts down
   sys.addShutdownHook(system.terminate())

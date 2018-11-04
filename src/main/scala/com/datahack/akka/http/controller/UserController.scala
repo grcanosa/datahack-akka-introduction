@@ -13,69 +13,21 @@ import com.datahack.akka.http.service.UserService._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class UserController(userActor: ActorRef)
-                     (implicit executionContext: ExecutionContext) extends Directives with JsonSupport {
+class UserController{
 
   implicit val timeout: Timeout = Timeout(60 seconds)
 
-  val routes: Route = getAllUsers ~ getUser ~ insertUser ~ updateUser ~ deleteUser
+  val routes: Route = ???
 
-  def getAllUsers: server.Route =
-    path("users") {
-      get {
-        onSuccess(userActor ? GetAllUsers) {
-            case AllUsers(users:Seq[User]) => complete(users)
-            case _ => complete(StatusCodes.InternalServerError)
-          }
-        }
-      }
+  def getAllUsers: server.Route = ???
 
-  def getUser: server.Route =
-    path("users" / LongNumber) { userId =>
-      get {
-        onSuccess(userActor ? SearchUser(userId)) {
-          case FoundUser(user: User) => complete(user)
-          case UserNotFound => complete(StatusCodes.NotFound)
-          case _ => complete(StatusCodes.InternalServerError)
-        }
-      }
-    }
+  def getUser: server.Route = ???
 
-  def insertUser: server.Route =
-    path("users") {
-      post {
-        entity(as[User]) { user =>
-          onSuccess(userActor ? CreateUser(user)) {
-            case StoredUser(user) => complete(user)
-            case _ => complete(StatusCodes.InternalServerError)
-          }
-        }
-      }
-    }
+  def insertUser: server.Route = ???
 
-  def updateUser: server.Route =
-    path("users" / LongNumber) { userId =>
-      put {
-        entity(as[User]) { user =>
-          onSuccess(userActor ? UpdateUser(user.copy(id = Some(userId)))) {
-            case UpdatedUser(user) => complete(user)
-            case UserNotFound => complete(StatusCodes.NotFound)
-            case _ => complete(StatusCodes.InternalServerError)
-          }
-        }
-      }
-    }
+  def updateUser: server.Route = ???
 
-  def deleteUser: server.Route =
-    path("users" / LongNumber) { userId =>
-      delete {
-        onSuccess(userActor ? DeleteUser(userId)) {
-          case UserDeleted => complete(StatusCodes.OK)
-          case UserNotFound => complete(StatusCodes.NotFound)
-          case _ => complete(StatusCodes.InternalServerError)
-        }
-      }
-    }
+  def deleteUser: server.Route = ???
 
 }
 

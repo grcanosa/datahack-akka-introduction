@@ -10,32 +10,28 @@ import com.datahack.akka.streams.example1.actors.QueueActor.SendAdvice
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 // TODO: extendemos de los traits necesarios para los test
-class QueueActorSpec
-  extends TestKit(ActorSystem("QueueActorSpec"))
-    with WordSpecLike
-    with Matchers
-    with BeforeAndAfterAll {
+class QueueActorSpec {
 
   // TODO: creamos el materializador para los test
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val materializer: ActorMaterializer = ???
 
+  /*
   "Exercise Streams 1" should {
 
     "teach you how to use an actor to inject messages into a stream" in {
       // TODO: crear un flujo materializado con un source queue de TextMessate y un Test Sink de TextMesajes y
       // nos quedamos con los dos
-      val (queue, probe) = Source.queue[TextMessage](Int.MaxValue, OverflowStrategy.backpressure)
-        .toMat(TestSink.probe[TextMessage])(Keep.both).run()
+      val (queue, probe) = ???
 
       // TODO: crear e iniciar el QueueActor con TestActorRef y pararle el source por parámeto
-      val queueActor = TestActorRef[QueueActor](new QueueActor(queue))
+      val queueActor: TestActorRef[QueueActor] = ???
 
       // TODO: decirle al actor que envíe un nuevo consejo al stream
-      queueActor ! SendAdvice("myAdvice")
 
       // TODO: Probamos que el consejo se recive por el stream
-      probe.request(1).expectNext(TextMessage("myAdvice"))
+
     }
   }
+  */
 
 }

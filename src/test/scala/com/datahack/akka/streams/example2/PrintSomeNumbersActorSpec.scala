@@ -10,23 +10,18 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 // TODO: extendemos de los traits necesarios para los test
 // en este caso vamos a indicarle al acotr sustem que utilice el TestEvenListener para logear los test
 // y poder probar los actores
-class PrintSomeNumbersActorSpec
-  extends TestKit(ActorSystem("PrintSomeNumbersActorSpec",
-    ConfigFactory.parseString("""akka.loggers = ["akka.testkit.TestEventListener"]""")))
-    with WordSpecLike
-    with Matchers
-    with BeforeAndAfterAll {
+class PrintSomeNumbersActorSpec {
 
   // TODO: crear el materializador para los test
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val materializer: ActorMaterializer = ???
 
+  /*
   "Print Some Numbers Actor" should {
 
     "teach you how to encapsulate a flow into an actor" in {
       // TODO: crear un actor PrintSomeNumbers y probar que llega el mensje "Done"
-      EventFilter.info(message = "Done", occurrences = 1) intercept {
-        system.actorOf(Props(classOf[PrintSomeNumbersActor], materializer))
-      }
+
     }
   }
+  */
 }

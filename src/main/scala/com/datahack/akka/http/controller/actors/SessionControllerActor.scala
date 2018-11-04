@@ -22,7 +22,7 @@ object SessionControllerActor {
 }
 
 // TODO: recive por parámetro la referencia al actor de inventario
-class SessionControllerActor(inventory: ActorRef) extends Actor {
+class SessionControllerActor extends Actor {
 
   implicit val executionContext: ExecutionContext = context.dispatcher
 
@@ -37,47 +37,20 @@ class SessionControllerActor(inventory: ActorRef) extends Actor {
       //      Sino existe le indicamos al controlador que lo esiste una sesión con ese id
       // Si no tenemos sessionId en el mensaje, entonces creamos un nuevo actor de sesión, dándole un sessionId
       // lo añadimos al mapa de sesiones y le indicamos a la sesión que procese el orden de compra
-      sessionId match {
-        case Some(id) =>
-          sessions.get(id) match {
-            case Some(session) =>
-              val requestId = UUID.randomUUID().toString
-              session ! ProcessOrder(order.copy(requestId = Some(requestId)), sender)
-            case None => sender ! SessionNotFound
-          }
-        case None =>
-          val sessionId = UUID.randomUUID().toString
-          val requestId = UUID.randomUUID().toString
-          val sessionRef = context.actorOf(Props(classOf[Session], inventory, sessionId), sessionId)
-          sessions.put(sessionId, sessionRef)
-          context.system.scheduler.scheduleOnce(30 minutes, sessionRef, CancelSession(self))
-          sessionRef ! ProcessOrder(order.copy(requestId = Some(requestId)), sender)
-      }
 
     case FinishSession(sessionId: String) =>
       // TODO: Nos indica que tenemos que hacer el checkout de la sesión
       // buscamos la sesión, si existe le indicamos que haga el checkout y la borramos del mapa
       // si no existe informamos al controlador
-      sessions.remove(sessionId) match {
-        case Some(session) =>
-          session ! Checkout(sender)
-        case None => sender ! SessionNotFound
-      }
 
     case RemoveSession(sessionId: String) =>
       // TODO: Nos indica que tenemos que cancelar la sesión
       // buscamos la sesión, si existe le indicamos que limpie la sesión y la borramos del mapa
       // si no existe informamos al controlador
-      sessions.remove(sessionId) match {
-        case Some(session) =>
-          session ! CancelSession(sender)
-        case None => sender ! SessionNotFound
-      }
 
     case SessionFinished(sessionId) =>
       // TODO: No indica que ha ocurrido un timeout de la sesión.
       // buscamos en el mapa la sesión le indicamos que a limpie y la borramos del mapa
-      sessions.remove(sessionId)
 
   }
 }

@@ -66,91 +66,20 @@ class SessionControllerActorSpec
     }
 
     "process order request into session indicated" in {
-      val sender = TestProbe()
-      implicit val senderRef: ActorRef = sender.ref
 
-      val sessionId = UUID.randomUUID().toString
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val session: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, sessionId))
-      val orderProduct = products.head
-      val order = Order(None, orderProduct.id.get, orderProduct.units)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-      sessionControllerRef.underlyingActor.sessions = mutable.Map[String, ActorRef](sessionId -> session)
-
-      sessionControllerRef ! AddOrderToSession(Some(sessionId), order)
-
-      val msg = sender.expectMsgType[OrderProcessed]
-      msg.sessionId shouldBe sessionId
-      sessionControllerRef.underlyingActor.sessions.size shouldBe 1
     }
 
     "get SessionNotFound message when trying to process order request into session that not exist" in {
-      val sender = TestProbe()
-      implicit val senderRef: ActorRef = sender.ref
 
-      val sessionId = UUID.randomUUID().toString
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val requestId = UUID.randomUUID().toString
-      val orderProduct = products.head
-      val order = Order(Some(requestId), orderProduct.id.get, orderProduct.units)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      sessionControllerRef ! AddOrderToSession(Some(sessionId), order)
-
-      sender.expectMsg(SessionNotFound)
     }
-  }
 
-  "finish a session and checkout its items into database" in {
-    val sender = TestProbe()
-    implicit val senderRef: ActorRef = sender.ref
+    "finish a session and checkout its items into database" in {
 
-    val sessionId = UUID.randomUUID().toString
-    val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-    val sessionControllerRef: TestActorRef[SessionControllerActor] =
-      TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-    val session: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, sessionId))
-    val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
+    }
 
-    inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-    inventoryRef.underlyingActor.context.become(behavior)
-    sessionControllerRef.underlyingActor.sessions = mutable.Map[String, ActorRef](sessionId -> session)
+    "cancel a session and clear its items into inventory" in {
 
-    sessionControllerRef ! FinishSession(sessionId)
-
-    sender.expectMsg(SessionCheckedOut)
-    sessionControllerRef.underlyingActor.sessions.size shouldBe 0
-  }
-
-  "cancel a session and clear its items into inventory" in {
-    val sender = TestProbe()
-    implicit val senderRef: ActorRef = sender.ref
-
-    val sessionId = UUID.randomUUID().toString
-    val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-    val sessionControllerRef: TestActorRef[SessionControllerActor] =
-      TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-    val session: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, sessionId))
-    val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-    inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-    inventoryRef.underlyingActor.context.become(behavior)
-    sessionControllerRef.underlyingActor.sessions = mutable.Map[String, ActorRef](sessionId -> session)
-
-    sessionControllerRef ! RemoveSession(sessionId)
-
-    sender.expectMsg(SessionFinished)
-    sessionControllerRef.underlyingActor.sessions.size shouldBe 0
+    }
   }
 
 }

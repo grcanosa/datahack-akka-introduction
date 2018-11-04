@@ -15,11 +15,7 @@ object QueueActor {
 }
 
 // TODO: El actor recive el source materializada. En este caso una cola que admite mensajes de tipo TextMessage
-class QueueActor(queue: SourceQueueWithComplete[TextMessage]) extends Actor { // TODO: es necesario que la clase sea un actor
+class QueueActor { // TODO: es necesario que la clase sea un actor
 
-  override def receive: Receive = {
-    // TODO: Cuando reciva el mensaje SendAdvice, encola el mensaje en el souce que recive por parámetro
-    case SendAdvice(advice) =>
-      queue.offer(TextMessage(advice))
-  }
+  // TODO: Cuando reciva el mensaje SendAdvice, encola el mensaje en el souce que recive por parámetro
 }

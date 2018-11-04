@@ -13,32 +13,23 @@ import scala.concurrent.ExecutionContextExecutor
 // en este caso vamos a indicarle al acotr sustem que utilice el TestEvenListener para logear los test
 // y poder probar los actores
 // Además vams a indicarle también que sobrescriba el valor filter-leeway para aumentar el timeout de los test
-class PrintMoreNumbersSpec
-  extends TestKit(ActorSystem("PrintMoreNumbersSpec",
-    ConfigFactory.parseString(
-      """akka.loggers = ["akka.testkit.TestEventListener"]
-        |akka.test.filter-leeway = 30000
-      """.stripMargin)))
-    with WordSpecLike
-    with Matchers
-    with BeforeAndAfterAll {
+class PrintMoreNumbersSpec {
 
   // TODO: crear el materializador para los test
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val materializer: ActorMaterializer = ???
 
   // TODO: crear el execution context para los test
-  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+  implicit val executionContext: ExecutionContextExecutor = ???
 
+  /*
   "Print More Numbers Actor" should {
 
     "teach you how to encapsulate a flow into an actor" in {
       // TODO: crear el actor PrintMoreNumbers
-      val actorRef = system.actorOf(Props(classOf[PrintMoreNumbers], materializer))
 
       // TODO: probar que se loguea el mensaje "Stopping" cuando el actor recive el mensaje "stop"
-      EventFilter.info(message = "Stopping", occurrences = 1) intercept {
-        actorRef ! "stop"
-      }
+
     }
   }
+  */
 }
