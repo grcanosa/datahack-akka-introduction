@@ -33,7 +33,7 @@ class Session(inventory: ActorRef, sessionId: String) extends Actor {
   var cancelOrCheckoutSender: Option[ActorRef] = None
 
   // TODO: iniciar el actor con el comportamiento normal
-  override def receive: Receive = normalBehaviour
+  override def receive: Receive = ???
 
   // TODO: este actor tiene dos comportamientos. El inicial es el comportamiento normal que espera procesar
   // órdenes de compra y las respuestas del actor de inventario
@@ -43,56 +43,35 @@ class Session(inventory: ActorRef, sessionId: String) extends Actor {
       // Si es así contestar que ya se ha procesado
       // Sino añadir la orden de compra a la colección de items procesados y procesar la compra con el
       // actor de inventario
-      itemsProcessed.get(order.requestId.get) match {
-        case Some(_) => sender ! OrderAlreadyBeingProcessed(order.requestId.get)
-        case None =>
-          itemsProcessed.put(order.requestId.get, (order, sender))
-          inventory ! OrderItem(order.requestId.get, order.productId, order.quantity)
-      }
 
     case NotEnoughProductLeft(requestId) =>
       // TODO: el actor de inventario nos indica que no hay suficientes unidades para stisfacer la orden de compra
       // Indicar al actor que hizo la orden de compra que no queda suficiente producto
-      itemsProcessed.get(requestId).foreach(order => order._2 ! NotEnoughProductLeft(requestId))
 
     case ProductNotFound(requestId) =>
       // TODO: el actor de inventario nos indica que no existe el producto indicado en la orden de compra
       // Indicar al actor que hizo la orden de compra que no existe ese producto
-      itemsProcessed.get(requestId).foreach(order => order._2 ! ProductNotFound(requestId))
 
     case ReservedProduct(requestId, amount) =>
       // TODO: el actor de inventario nos indica que ha procesado la compra.
       // añadir al carrito de la compra el producto gestionado
       // Informar al actor que hizo la orden de compra de que el producto ya ha sido añadido a la sesión
-      itemsProcessed.get(requestId).foreach { order =>
-        shoppingCart.get(order._1.productId).map { item =>
-          shoppingCart.put(order._1.productId, item.copy(quantity = item.quantity + order._1.quantity))
-        }
-        order._2 ! OrderProcessed(sessionId, order._1)
-      }
 
     case CannotProcessOder(requestId) =>
       // TODO: el actor de invenrario nos indica que no puede procesar las ordenes de compra porque está iniciándose
       // Informar al actor que hizo la petición de compra de que no se puede procesar su orden
-      itemsProcessed.get(requestId).foreach(order => order._2 ! CannotProcessOder(requestId))
 
     case Checkout(requestActor) =>
       // TODO: se pide hacer un checkout de la sesión
       // actualizar el valor de la variable cancelOrCheckout con la referencia al actor que hizo la petición
       // cambiar de comportamiento al actor al comportamiento de checkout
       // indicar al actor de invenario que persista el carrito de la sesión
-      cancelOrCheckoutSender = Some(requestActor)
-      context.become(checkOutOrCancelBehaviour)
-      inventory ! PersistSession(shoppingCart.values.toSeq)
 
     case CancelSession(requestActor) =>
       // TODO: le indica al actor que tiene que cacelar la sesión
       // actualizar el valor de la variable cancelOrCheckout con la referencia al actor que hizo la petición
       // cambiar de comportamiento al actor al comportamiento de checkout
       // indicar al actor de inventario que reestablezca el inventario con los productos del carrito de la sesión
-      cancelOrCheckoutSender = Some(requestActor)
-      context.become(checkOutOrCancelBehaviour)
-      inventory ! ClearSession(shoppingCart.values.toSeq)
 
   }
 
@@ -103,17 +82,14 @@ class Session(inventory: ActorRef, sessionId: String) extends Actor {
       // TODO: el actor de inventario nos indica que ha terminado de hacer el checkout de la sesión
       // informamos al actor que nos hizo la petición con el mismo mensaje que el actor de inventario
       // matamos al actor de la sesión
-      cancelOrCheckoutSender.foreach(_ ! SessionCheckedOut)
-      self ! PoisonPill
+
     case SessionRestored =>
       // TODO: el actor de inventario nos indica que ha terminado de limpiar la sesión
       // informamos al actor que nos hizo la petición con el mismo mensaje que el actor de inventario
       // matamos al actor de la sesión
-      cancelOrCheckoutSender.foreach(_ ! SessionFinished)
-      self ! PoisonPill
+
     case _ =>
       // TODO: no se admiten otro tipo de mensajes. Se informa al actor que envía el mensaje que la sesión
       // está terminada
-      sender ! SessionFinished
   }
 }

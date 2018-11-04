@@ -44,27 +44,11 @@ class InventorySpec
   "Inventory Actor" should {
 
     "create inventory from database when receive InitInventory message" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      EventFilter.info(
-        pattern = s"Constructing inventory with *",
-        occurrences = 1
-      ) intercept {
-        inventoryRef ! InitInventory
-      }
-      inventoryRef.underlyingActor.inventory.size shouldBe products.length
+
     }
 
     "response with CannotProcessOder when receive OrderItem and the behaviour of the actor is bootstrapBehaviour" in {
-      val sender = TestProbe()
-      implicit val senderRef: ActorRef = sender.ref
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val requestId = UUID.randomUUID().toString
-      val productId = products.head.id.get
-      val productQuantity = products.head.units
 
-      inventoryRef ! OrderItem(requestId, productId, productQuantity)
-
-      sender.expectMsg(CannotProcessOder(requestId))
     }
 
     "response with ReservedProduct after actualize inventory" in {
@@ -87,75 +71,19 @@ class InventorySpec
     }
 
     "response with NotEnoughProductLeft when there are not enough quantity of product at the inventory" in {
-      val sender = TestProbe()
-      implicit val senderRef: ActorRef = sender.ref
 
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val requestId = UUID.randomUUID().toString
-      val productId = products.head.id.get
-      val productQuantity = products.head.units
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      inventoryRef ! OrderItem(requestId, productId, productQuantity + 20)
-
-      sender.expectMsg(NotEnoughProductLeft(requestId))
     }
 
     "response with ProductNotFound when the product not exist at the inventory" in {
-      val sender = TestProbe()
-      implicit val senderRef: ActorRef = sender.ref
 
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val requestId = UUID.randomUUID().toString
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      inventoryRef ! OrderItem(requestId, products.length + 20, 20)
-
-      sender.expectMsg(ProductNotFound(requestId))
     }
 
     "persist inventory into database when receive PersistSession message" in {
-      val sender = TestProbe()
-      implicit val senderRef: ActorRef = sender.ref
-      val requestId = UUID.randomUUID().toString
-      val item = Order(Some(requestId), inventory.head._1, inventory.head._2._2)
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
 
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      inventoryRef ! PersistSession(Seq(item))
-
-      sender.expectMsg(SessionCheckedOut)
-
-      val Some(product: Product) = Await.result(SqlTestUtils.findEntity(inventory.head._2._1, schemaName), 5 seconds)
-      product.units shouldBe 0
     }
 
     "restore inventory after clear a session" in {
-      val sender = TestProbe()
-      implicit val senderRef: ActorRef = sender.ref
-      val requestId = UUID.randomUUID().toString
-      val item = Order(Some(requestId), inventory.head._1, inventory.head._2._2)
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
 
-      val updatedInventory = Seq(inventory.head.copy(inventory.head._1, (inventory.head._2._1, 0F))) ++ inventory.toSeq.tail
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(updatedInventory: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      inventoryRef ! ClearSession(Seq(item))
-
-      sender.expectMsg(SessionRestored)
-      val updatedItem = inventoryRef.underlyingActor.inventory.get(item.productId).get
-      updatedItem._2 shouldBe item.quantity
     }
 
   }

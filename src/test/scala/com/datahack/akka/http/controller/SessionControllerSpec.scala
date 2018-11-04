@@ -45,10 +45,10 @@ class SessionControllerSpec
   "Session Controller" should {
 
     "create a session and add order to it" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
+      val inventoryRef: TestActorRef[Inventory] = ???
       val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
         TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
+      val sessionController = new SessionController()
 
       val productToOrder = products.head
       val order = Order(None, productToOrder.id.get, productToOrder.units)
@@ -67,160 +67,35 @@ class SessionControllerSpec
     }
 
     "get 404 Not found when trying to order a product that does not exist into inventory" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
 
-      val productToOrder = products.head
-      val order = Order(None, productToOrder.id.get + 20, 20)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Post("/session").withEntity(
-        ContentTypes.`application/json`,
-        order.toJson
-      ) ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.NotFound
-      }
     }
 
     "add a order to a existing session" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
-      val sessionId = UUID.randomUUID().toString
-      val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, sessionId))
 
-      sessionControllerActorRef.underlyingActor.sessions = mutable.Map[String, ActorRef](sessionId -> sessionRef)
-      val productToOrder = products.head
-      val order = Order(None, productToOrder.id.get, productToOrder.units)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Put(s"/session/$sessionId").withEntity(
-        ContentTypes.`application/json`,
-        order.toJson
-      ) ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.OK
-        responseAs[Order] shouldBe sessionRef.underlyingActor.itemsProcessed.values.head._1
-      }
     }
 
     "get 404 NotFound error when trying to add an order into a session that not exist" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
-      val sessionId = UUID.randomUUID().toString
 
-      val productToOrder = products.head
-      val order = Order(None, productToOrder.id.get, productToOrder.units)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Put(s"/session/$sessionId").withEntity(
-        ContentTypes.`application/json`,
-        order.toJson
-      ) ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.NotFound
-      }
     }
 
     "get 404 NotFound error when trying to add an order of a product that not exist into a session" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
-      val sessionId = UUID.randomUUID().toString
-      val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, sessionId))
 
-      sessionControllerActorRef.underlyingActor.sessions = mutable.Map[String, ActorRef](sessionId -> sessionRef)
-      val productToOrder = products.head
-      val order = Order(None, productToOrder.id.get, productToOrder.units)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Put(s"/session/$sessionId").withEntity(
-        ContentTypes.`application/json`,
-        order.toJson
-      ) ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.NotFound
-      }
     }
 
     "get 200 Ok message after checkout the session" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
-      val sessionId = UUID.randomUUID().toString
-      val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, sessionId))
 
-      sessionControllerActorRef.underlyingActor.sessions = mutable.Map[String, ActorRef](sessionId -> sessionRef)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Get(s"/session/$sessionId/checkout") ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.OK
-      }
     }
 
     "get 404 NotFound message when trying to checkout a session that does not exist" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
-      val sessionId = UUID.randomUUID().toString
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
 
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Get(s"/session/$sessionId/checkout") ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.NotFound
-      }
     }
 
     "get 200 Ok message after cancel the session" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
-      val sessionId = UUID.randomUUID().toString
-      val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, sessionId))
 
-      sessionControllerActorRef.underlyingActor.sessions = mutable.Map[String, ActorRef](sessionId -> sessionRef)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Delete(s"/session/$sessionId") ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.OK
-      }
     }
 
     "get 404 NotFound message when trying to cancel a session that does not exist" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionControllerActorRef: TestActorRef[SessionControllerActor] =
-        TestActorRef[SessionControllerActor](new SessionControllerActor(inventoryRef))
-      val sessionController = new SessionController(sessionControllerActorRef)
-      val sessionId = UUID.randomUUID().toString
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
 
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      Delete(s"/session/$sessionId") ~> sessionController.routes ~> check {
-        status shouldBe StatusCodes.NotFound
-      }
     }
   }
 }

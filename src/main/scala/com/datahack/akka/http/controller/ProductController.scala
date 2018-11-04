@@ -18,63 +18,16 @@ class ProductController (productActor: ActorRef)
 
   implicit val timeout: Timeout = Timeout(60 seconds)
 
-  val routes: Route = getAllProducts ~ getProduct ~ insertProduct ~ updateProduct ~ deleteProduct
+  val routes: Route = ???
 
-  def getAllProducts: server.Route =
-    path("products") {
-      get {
-        onSuccess(productActor ? GetAllProducts) {
-          case AllProducts(products:Seq[Product]) => complete(products)
-          case _ => complete(StatusCodes.InternalServerError)
-        }
-      }
-    }
+  def getAllProducts: server.Route = ???
 
-  def getProduct: server.Route =
-    path("products" / LongNumber) { productId =>
-      get {
-        onSuccess(productActor ? SearchProduct(productId)) {
-          case FoundProduct(product: Product) => complete(product)
-          case ProductNotFound => complete(StatusCodes.NotFound)
-          case _ => complete(StatusCodes.InternalServerError)
-        }
-      }
-    }
+  def getProduct: server.Route = ???
 
-  def insertProduct: server.Route =
-    path("products") {
-      post {
-        entity(as[Product]) { product =>
-          onSuccess(productActor ? CreateProduct(product)) {
-            case StoredProduct(product) => complete(product)
-            case _ => complete(StatusCodes.InternalServerError)
-          }
-        }
-      }
-    }
+  def insertProduct: server.Route = ???
 
-  def updateProduct: server.Route =
-    path("products" / LongNumber) { productId =>
-      put {
-        entity(as[Product]) { product =>
-          onSuccess(productActor ? UpdateProduct(product.copy(id = Some(productId)))) {
-            case UpdatedProduct(product) => complete(product)
-            case ProductNotFound => complete(StatusCodes.NotFound)
-            case _ => complete(StatusCodes.InternalServerError)
-          }
-        }
-      }
-    }
+  def updateProduct: server.Route = ???
 
-  def deleteProduct: server.Route =
-    path("products" / LongNumber) { productId =>
-      delete {
-        onSuccess(productActor ? DeleteProduct(productId)) {
-          case ProductDeleted => complete(StatusCodes.OK)
-          case ProductNotFound => complete(StatusCodes.NotFound)
-          case _ => complete(StatusCodes.InternalServerError)
-        }
-      }
-    }
+  def deleteProduct: server.Route = ???
 
 }

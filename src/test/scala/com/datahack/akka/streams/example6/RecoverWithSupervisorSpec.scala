@@ -11,25 +11,21 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class RecoverWithSupervisorSpec
-  extends TestKit(ActorSystem("RecoverWithSupervisorSpec"))
-    with WordSpecLike
-    with Matchers
-    with BeforeAndAfterAll {
+class RecoverWithSupervisorSpec {
 
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val materializer: ActorMaterializer = ???
 
+  /*
   "Recover with supervisor" should {
 
     "teach you how to recover from errors in a stream using a Recover decider" in {
 
       // TODO: obtenemos una referencia al singleton del RecoverWithRetries
-      val recoverWithSupervisor = RecoverWithSupervisor
 
       // TODO: materializamos el source del recoverWithSupervisor con un sink fold que sume los datos
       // probamos que el resultado es el esperado
-      val result: Int = Await.result(recoverWithSupervisor.source.runWith(Sink.fold(0)(_ + _)), 5 seconds)
-      result shouldBe 150
+
     }
   }
+  */
 }

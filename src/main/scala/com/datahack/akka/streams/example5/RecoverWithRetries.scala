@@ -20,13 +20,13 @@ import scala.concurrent.{ExecutionContext, Future}
 object RecoverWithRetries {
 
   // TODO: creamos de forma implícita el actor system
-  implicit val system: ActorSystem = ActorSystem("RecoverWithRetries")
+  implicit val system: ActorSystem = ???
 
   // TODO: creamos de forma implícita el execution context para gestionar el bind del actor Http
-  implicit val executionContext: ExecutionContext = system.dispatcher
+  implicit val executionContext: ExecutionContext = ???
 
   // TODO: creamos de forma implícita el materializador que necesitamos para materializar el stream
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val materializer: ActorMaterializer = ???
 
   // Esta lista es la que vamos a añadir al stream en caso de que haya algún fallo en el stream
   val planB = Source(List("five", "six", "seven", "eight"))
@@ -35,24 +35,12 @@ object RecoverWithRetries {
   // si el valor es menor de 5 lo pasamos a string
   // sino lanzamos una RuntimeException
   // utilizamos el método recoverWithRetries para capturar la excepción y añadir al stream la lista del plan b
-  val source: Source[String, NotUsed] = Source(0 to 10).map(n ⇒
-    if (n < 5) n.toString
-    else throw new RuntimeException("Boom!")
-  ).recoverWithRetries(attempts = 1, {
-    case _: RuntimeException ⇒ planB
-  })
 
   // TODO: creamos el método runFlow que materializa el source y por cada elemento del stream lo pinta por pantalla
-  def runFlow: Future[Done] = {
-    source.runForeach(println)
-  }
+  def runFlow: Future[Done] = ???
 
   // TODO: creamos el método main que llama al método runFlow y cuando se completa el flujo terminamos el actor system
   // vamos ha sobrescribir este método en vez de utilizar el trait App para poder testear el flujo
-  def main(args: Array[String]) = {
-    runFlow.onComplete { _ =>
-      system.terminate()
-    }
-  }
+  def main(args: Array[String]) = ???
 
 }

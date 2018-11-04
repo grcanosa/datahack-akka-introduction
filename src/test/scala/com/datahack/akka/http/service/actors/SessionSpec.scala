@@ -71,84 +71,24 @@ class SessionSpec
     }
 
     "process an order and return NotEnoughProductLeft when there is no enough product units" in {
-      val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-      val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, UUID.randomUUID().toString))
-      val probe = TestProbe()
-      val requestId = UUID.randomUUID().toString
-      val orderProduct = products.head
-      val order = Order(Some(requestId), orderProduct.id.get, orderProduct.units + 20)
-      val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
 
-      inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-      inventoryRef.underlyingActor.context.become(behavior)
-
-      sessionRef ! ProcessOrder(order, probe.ref)
-
-      probe.expectMsg(NotEnoughProductLeft(requestId))
-      inventoryRef.underlyingActor.inventory.get(order.productId).get._2 shouldBe orderProduct.units
     }
-  }
 
-  "process an order and return ProductNotFound message when the product does not exist in the inventory" in {
-    val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-    val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, UUID.randomUUID().toString))
-    val probe = TestProbe()
-    val requestId = UUID.randomUUID().toString
-    val order = Order(Some(requestId), products.length + 20, 20)
-    val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
+    "process an order and return ProductNotFound message when the product does not exist in the inventory" in {
 
-    inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-    inventoryRef.underlyingActor.context.become(behavior)
+    }
 
-    sessionRef ! ProcessOrder(order, probe.ref)
+    "return OrderAlreadyBeingProcessed when receive a process order that it is already processed" in {
 
-    probe.expectMsg(ProductNotFound(requestId))
-  }
+    }
 
-  "return OrderAlreadyBeingProcessed when receive a process order that it is already processed" in {
-    val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-    val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, UUID.randomUUID().toString))
-    val probe = TestProbe()
-    val requestId = UUID.randomUUID().toString
-    val order = Order(Some(requestId), products.length + 20, 20)
-    val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
+    "return SessionCheckedOut when it is requested an already done" in {
 
-    inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-    inventoryRef.underlyingActor.context.become(behavior)
+    }
 
-    sessionRef.underlyingActor.itemsProcessed = mutable.Map[String, (Order, ActorRef)](requestId -> (order, probe.ref))
+    "return SessionFinished when it is requested an already done" in {
 
-    sessionRef ! ProcessOrder(order, probe.ref)
-
-    probe.expectMsg(OrderAlreadyBeingProcessed(requestId))
-  }
-
-  "return SessionCheckedOut when it is requested an already done" in {
-    val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-    val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, UUID.randomUUID().toString))
-    val probe = TestProbe()
-    val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-    inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-    inventoryRef.underlyingActor.context.become(behavior)
-
-    sessionRef ! Checkout(probe.ref)
-
-    probe.expectMsg(SessionCheckedOut)
-  }
-
-  "return SessionFinished when it is requested an already done" in {
-    val inventoryRef: TestActorRef[Inventory] = TestActorRef[Inventory](new Inventory(productService))
-    val sessionRef: TestActorRef[Session] = TestActorRef[Session](new Session(inventoryRef, UUID.randomUUID().toString))
-    val probe = TestProbe()
-    val behavior: Inventory#Receive = inventoryRef.underlyingActor.manageOrdersBehaviour
-
-    inventoryRef.underlyingActor.inventory = collection.mutable.Map(inventory.toSeq: _*)
-    inventoryRef.underlyingActor.context.become(behavior)
-
-    sessionRef ! CancelSession(probe.ref)
-
-    probe.expectMsg(SessionFinished)
+    }
   }
 
 }

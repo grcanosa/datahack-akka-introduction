@@ -23,36 +23,15 @@ object ProductService {
 
 class ProductService(productDao: ProductDao) {
 
-  def products()(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] =
-    productDao.getAll.map(AllProducts)
+  def products()(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = ???
 
-  def searchProduct(id: Long)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] =
-    productDao.getById(id).map(_.map(FoundProduct).getOrElse(ProductNotFound))
+  def searchProduct(id: Long)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = ???
 
-  def insertProduct(product: Product)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = for {
-    id <- productDao.insert(product)
-    product <- productDao.getById(id)
-  } yield StoredProduct(product)
+  def insertProduct(product: Product)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = ???
 
-  def updateProduct(product: Product)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = {
-    val result = for {
-      productFound <- productDao.getById(product.id.get)
-      if productFound.isDefined
-      _ <- productDao.update(product)
-    } yield UpdatedProduct(product)
+  def updateProduct(product: Product)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = ???
 
-    result.recover { case _: NoSuchElementException => ProductNotFound }
-  }
-
-  def deleteProduct(id: Long)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = {
-    val result = for {
-      productFound <- productDao.getById(id)
-      if productFound.isDefined
-      _ <- productDao.delete(id)
-    } yield { ProductDeleted }
-
-    result.recover { case _: NoSuchElementException => ProductNotFound }
-  }
+  def deleteProduct(id: Long)(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = ???
 
   def persistSession(items: Seq[(Long, Float)])(implicit executionContext: ExecutionContext): Future[ProductServiceResponse] = {
     for {
