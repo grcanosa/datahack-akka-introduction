@@ -1,10 +1,10 @@
-package scala.com.datahack.akka.introduction.actors
+package com.datahack.akka.introduction.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import org.scalacheck.Gen
 
-import scala.com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
-import scala.com.datahack.akka.introduction.actors.Teacher.{Advice, AskAdvice, IDoNotUnderstand}
+import com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
+import com.datahack.akka.introduction.actors.Teacher.{Advice, AskAdvice, IDoNotUnderstand}
 
 object Student{
 
@@ -15,8 +15,9 @@ class Student(teacher:ActorRef) extends Actor with ActorLogging{
 
   log.debug(s"Creating student: ${self.path}")
 
-  val genTopics:Gen[String] =
+  var genTopics:Gen[String] =
     Gen.oneOf("History","Maths","Geography","Physics","Literature","Biology")
+
 
   override def receive: Receive = {
     case PerformAnAdviceRequest =>
@@ -24,5 +25,6 @@ class Student(teacher:ActorRef) extends Actor with ActorLogging{
       teacher ! AskAdvice(topic)
     case Advice(texto) => log.info(s"The requested advice: $texto")
     case IDoNotUnderstand => log.error("NPI!")
+
   }
 }

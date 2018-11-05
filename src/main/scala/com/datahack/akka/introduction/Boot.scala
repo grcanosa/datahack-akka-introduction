@@ -2,12 +2,13 @@ package com.datahack.akka.introduction
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 
-import scala.com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
-import scala.com.datahack.akka.introduction.actors.{Student, Teacher}
+import com.datahack.akka.introduction.actors.Student.PerformAnAdviceRequest
+import com.datahack.akka.introduction.actors.{Student, Teacher}
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 
 object Boot extends App {
+
 
   val actorSystem = ActorSystem("UniversityMessagesSystem")
 

@@ -1,8 +1,8 @@
-package scala.com.datahack.akka.introduction.actors
+package com.datahack.akka.introduction.actors
 
 import akka.actor.{Actor, ActorLogging}
 
-import scala.com.datahack.akka.introduction.actors.Teacher.{Advice, AskAdvice, IDoNotUnderstand}
+import com.datahack.akka.introduction.actors.Teacher.{Advice, AskAdvice, IDoNotUnderstand}
 
 object Teacher{
   case class AskAdvice(topic:String)
@@ -14,7 +14,7 @@ class Teacher extends Actor with ActorLogging{
 
   log.debug(s"Creating teacher: ${self.path}")
 
-  val advices:Map[String,String] = Map[String,String] (
+  var advices:Map[String,String] = Map[String,String] (
     "History" -> "Moderation is for cowards",
     "Maths" -> "Anything worth doing is worth overdoing",
     "Geography" -> "Anything worth doing is worth overdoing",
