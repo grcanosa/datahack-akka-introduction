@@ -22,13 +22,52 @@ object UserService {
 
 class UserService(userDao: UserDao) {
 
-  def users()(implicit executionContext: ExecutionContext): Future[UserServiceResponse] = ???
+  def users()(implicit executionContext: ExecutionContext): Future[UserServiceResponse] =
+    userDao.getAll.map(AllUsers)
 
-  def searchUser(id: Long)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] = ???
+  def searchUser(id: Long)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] =
+    userDao.getById(id).map {
+      case Some(user) => FoundUser(user)
+      case None => UserNotFound
+    }
 
-  def insertUser(user: User)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] =  ???
+  //userDao.getById(id).map(_.map(FoundUser).getOrElse(UserNotFound))
 
-  def updateUser(user: User)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] =  ???
+  def insertUser(user: User)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] =
+    for {
+      id <- userDao.insert(user)
+      user2 <- userDao.getById(id)
+    } yield StoredUser(user2)
 
-  def deleteUser(id: Long)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] =  ???
+
+  def updateUser(user: User)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] = {
+    (for {
+      userFound <- userDao.getById(user.id.get)
+      if userFound.isDefined
+      _ <- userDao.update(user)
+      updatedUser <- userDao.getById(user.id.get)
+    } yield
+      updatedUser.map(UpdatedUser).get) recover {
+      case _: NoSuchElementException => UserNotFound
+      case e: Exception => throw e
+    }
+  }
+//    userDao.update(user).map{
+//      case 0 => UpdatedUser(user)
+//      case _ => UserNotFound
+//    }
+
+  def deleteUser(id: Long)(implicit executionContext: ExecutionContext): Future[UserServiceResponse] ={
+    (for {
+      userFound <- userDao.getById(id)
+      if userFound.isDefined
+      _ <- userDao.delete(id)
+    } yield UserDeleted ) recover {
+      case _: NoSuchElementException => UserNotFound
+    }
+  }
+//    userDao.delete(id).map{
+//      case 0 => UserDeleted
+//      case _ => UserNotFound
+//    }
 }

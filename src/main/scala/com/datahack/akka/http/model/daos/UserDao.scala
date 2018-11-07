@@ -18,7 +18,7 @@ class UserDao {
   def insert(user: User): Future[Long] =
     db.run(users returning users.map(_.id) += user)
 
-  def update(user: User): Future[Int] = {
+  def update(user: User): Future[Int] = {  //el entero que nos devuelve es el numero de lineas modificadas
     db.run(users.filter(_.id === user.id).update(user))
   }
 
